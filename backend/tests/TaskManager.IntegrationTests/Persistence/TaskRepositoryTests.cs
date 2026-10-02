@@ -1,10 +1,10 @@
-using TaskManager.Domain.Tasks;
+﻿using TaskManager.Domain.Tasks;
 using TaskManager.Domain.Users;
 using TaskManager.Infrastructure.Persistence;
 
 namespace TaskManager.IntegrationTests.Persistence;
 
-[Collection(SqlServerCollection.Name)]
+[Collection(SqlServerGroup.Name)]
 public sealed class TaskRepositoryTests(SqlServerFixture fixture) : IAsyncLifetime
 {
     private static readonly DateTime NowUtc = new(2026, 10, 2, 18, 0, 0, DateTimeKind.Utc);
@@ -153,7 +153,7 @@ public sealed class TaskRepositoryTests(SqlServerFixture fixture) : IAsyncLifeti
     public async Task AddAsync_WithUnicodeAndQuotes_StoresTextVerbatim()
     {
         Skip.If(fixture.UnavailableReason is not null, fixture.UnavailableReason);
-        const string title = "Revisión O'Brien; DROP TABLE dbo.Tasks; -- ñ 🚀";
+        const string title = "RevisiÃ³n O'Brien; DROP TABLE dbo.Tasks; -- Ã± ðŸš€";
         var task = TaskItem.Create(_owner.Id, title, null, Today, NowUtc);
 
         await _sut.AddAsync(task, CancellationToken.None);

@@ -1,4 +1,4 @@
-using Microsoft.Data.SqlClient;
+﻿using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using TaskManager.Infrastructure.Persistence;
@@ -31,7 +31,7 @@ public sealed class SqlServerFixture : IAsyncLifetime
 
     public DatabaseOptions Options => new() { ConnectionString = ConnectionString };
 
-    public SqlConnectionFactory CreateConnectionFactory() => new(Microsoft.Extensions.Options.Options.Create(Options));
+    internal SqlConnectionFactory CreateConnectionFactory() => new(Microsoft.Extensions.Options.Options.Create(Options));
 
     public async Task InitializeAsync()
     {
@@ -68,7 +68,7 @@ public sealed class SqlServerFixture : IAsyncLifetime
                 N'DROP DATABASE ' + QUOTENAME(@name) + N';';
             EXEC (@sql);
             """;
-        command.Parameters.AddWithValue("@name", database);
+        command.Parameters.Add("@name", System.Data.SqlDbType.NVarChar, 128).Value = database;
         await command.ExecuteNonQueryAsync();
     }
 
@@ -83,7 +83,7 @@ public sealed class SqlServerFixture : IAsyncLifetime
 }
 
 [CollectionDefinition(Name)]
-public sealed class SqlServerCollection : ICollectionFixture<SqlServerFixture>
+public sealed class SqlServerGroup : ICollectionFixture<SqlServerFixture>
 {
     public const string Name = "SqlServer";
 }

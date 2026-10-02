@@ -1,10 +1,10 @@
-using TaskManager.Application.Common;
+﻿using TaskManager.Application.Common;
 using TaskManager.Domain.Users;
 using TaskManager.Infrastructure.Persistence;
 
 namespace TaskManager.IntegrationTests.Persistence;
 
-[Collection(SqlServerCollection.Name)]
+[Collection(SqlServerGroup.Name)]
 public sealed class UserRepositoryTests(SqlServerFixture fixture) : IAsyncLifetime
 {
     private static readonly DateTime NowUtc = new(2026, 10, 2, 18, 0, 0, DateTimeKind.Utc);
