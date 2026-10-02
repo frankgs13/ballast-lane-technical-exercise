@@ -1,0 +1,73 @@
+<h2 mat-dialog-title>{{ isEdit ? 'Edit task' : 'New task' }}</h2>
+
+<mat-dialog-content>
+  @if (error(); as message) {
+    <div class="error-banner" role="alert">
+      <mat-icon aria-hidden="true">error_outline</mat-icon>
+      <span>{{ message }}</span>
+    </div>
+  }
+
+  <form id="task-form" [formGroup]="form" (ngSubmit)="save()" novalidate>
+    <mat-form-field>
+      <mat-label>Title</mat-label>
+      <input matInput formControlName="title" [maxlength]="titleMax" cdkFocusInitial autocomplete="off" />
+      <mat-hint align="end">{{ form.controls.title.value.length }} / {{ titleMax }}</mat-hint>
+      @let title = form.controls.title;
+      @if (title.hasError('required')) {
+        <mat-error>Title is required</mat-error>
+      } @else if (title.hasError('server')) {
+        <mat-error>{{ title.getError('server') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Description</mat-label>
+      <textarea matInput formControlName="description" rows="4" [maxlength]="descriptionMax"></textarea>
+      <mat-hint align="end">{{ form.controls.description.value.length }} / {{ descriptionMax }}</mat-hint>
+      @if (form.controls.description.hasError('server')) {
+        <mat-error>{{ form.controls.description.getError('server') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Due date</mat-label>
+      <input matInput formControlName="dueDate" [matDatepicker]="picker" [min]="minDate" />
+      <mat-datepicker-toggle matIconSuffix [for]="picker" />
+      <mat-datepicker #picker />
+      @let dueDate = form.controls.dueDate;
+      @if (dueDate.hasError('required') || dueDate.hasError('matDatepickerParse')) {
+        <mat-error>Enter a valid date</mat-error>
+      } @else if (dueDate.hasError('matDatepickerMin')) {
+        <mat-error>Due date cannot be in the past</mat-error>
+      } @else if (dueDate.hasError('server')) {
+        <mat-error>{{ dueDate.getError('server') }}</mat-error>
+      }
+    </mat-form-field>
+
+    @if (isEdit) {
+      <mat-form-field>
+        <mat-label>Status</mat-label>
+        <mat-select formControlName="status">
+          @for (status of statuses; track status.value) {
+            <mat-option [value]="status.value">{{ status.label }}</mat-option>
+          }
+        </mat-select>
+        @if (form.controls.status.hasError('server')) {
+          <mat-error>{{ form.controls.status.getError('server') }}</mat-error>
+        }
+      </mat-form-field>
+    }
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close type="button" [disabled]="saving()">Cancel</button>
+  <button mat-flat-button type="submit" form="task-form" [disabled]="saving()">
+    @if (saving()) {
+      <mat-spinner diameter="20" />
+    } @else {
+      {{ isEdit ? 'Save changes' : 'Create task' }}
+    }
+  </button>
+</mat-dialog-actions>

@@ -1,0 +1,85 @@
+@let counts = store.counts();
+<div class="page-container">
+  <header class="page-header">
+    <div>
+      <h1>My tasks</h1>
+      <p class="subtitle">
+        Hi {{ auth.currentUser()?.username }} · {{ counts.All }} total
+        @if (counts.Overdue > 0) {
+          · <span class="overdue-count">{{ counts.Overdue }} overdue</span>
+        }
+      </p>
+    </div>
+    <button mat-flat-button class="new-task" (click)="openCreate()">
+      <mat-icon>add</mat-icon>
+      New task
+    </button>
+  </header>
+
+  <section class="toolbar" aria-label="Filters">
+    <mat-form-field class="search" subscriptSizing="dynamic">
+      <mat-label>Search</mat-label>
+      <mat-icon matPrefix aria-hidden="true">search</mat-icon>
+      <input matInput [ngModel]="store.search()" (ngModelChange)="store.search.set($event)" autocomplete="off" />
+      @if (store.search()) {
+        <button mat-icon-button matSuffix aria-label="Clear search" (click)="store.search.set('')">
+          <mat-icon>close</mat-icon>
+        </button>
+      }
+    </mat-form-field>
+
+    <mat-button-toggle-group
+      class="filters"
+      hideSingleSelectionIndicator
+      aria-label="Filter by status"
+      [value]="store.statusFilter()"
+      (change)="setFilter($event.value)"
+    >
+      <mat-button-toggle value="All">All ({{ counts.All }})</mat-button-toggle>
+      @for (status of statuses; track status.value) {
+        <mat-button-toggle [value]="status.value">{{ status.label }} ({{ counts[status.value] }})</mat-button-toggle>
+      }
+    </mat-button-toggle-group>
+  </section>
+
+  @if (store.loading()) {
+    <mat-progress-bar mode="indeterminate" aria-label="Loading tasks" />
+  }
+
+  @if (store.error(); as message) {
+    <div class="error-banner" role="alert">
+      <mat-icon aria-hidden="true">cloud_off</mat-icon>
+      <span>{{ message }}</span>
+      <button mat-button (click)="store.load()">Retry</button>
+    </div>
+  } @else if (store.loaded()) {
+    @let tasks = store.visibleTasks();
+    @if (tasks.length) {
+      <section class="grid" aria-label="Tasks">
+        @for (task of tasks; track task.id) {
+          <app-task-card
+            [task]="task"
+            [busy]="busyIds().has(task.id)"
+            (edit)="openEdit($event)"
+            (delete)="confirmDelete($event)"
+            (statusChange)="changeStatus($event.task, $event.status)"
+          />
+        }
+      </section>
+    } @else if (counts.All === 0) {
+      <div class="empty">
+        <mat-icon aria-hidden="true">inbox</mat-icon>
+        <h2>No tasks yet</h2>
+        <p>Create your first task to get started.</p>
+        <button mat-flat-button (click)="openCreate()"><mat-icon>add</mat-icon> New task</button>
+      </div>
+    } @else {
+      <div class="empty">
+        <mat-icon aria-hidden="true">filter_alt_off</mat-icon>
+        <h2>No matching tasks</h2>
+        <p>Try a different filter or search term.</p>
+        <button mat-button (click)="setFilter('All'); store.search.set('')">Clear filters</button>
+      </div>
+    }
+  }
+</div>

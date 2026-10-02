@@ -1,0 +1,107 @@
+<section class="card">
+  <header class="header">
+    <mat-icon aria-hidden="true">person_add</mat-icon>
+    <h1>Create your account</h1>
+    <p>Start organizing your work in seconds</p>
+  </header>
+
+  @if (error(); as message) {
+    <div class="error-banner" role="alert">
+      <mat-icon aria-hidden="true">error_outline</mat-icon>
+      <span>{{ message }}</span>
+    </div>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    <mat-form-field>
+      <mat-label>Username</mat-label>
+      <input matInput formControlName="username" autocomplete="username" autocapitalize="none" />
+      <mat-icon matPrefix aria-hidden="true">person</mat-icon>
+      @let username = form.controls.username;
+      @if (username.hasError('required')) {
+        <mat-error>Username is required</mat-error>
+      } @else if (username.hasError('minlength') || username.hasError('maxlength')) {
+        <mat-error>Must be between 3 and 50 characters</mat-error>
+      } @else if (username.hasError('pattern')) {
+        <mat-error>Only letters, numbers, '.', '_' and '-'</mat-error>
+      } @else if (username.hasError('server')) {
+        <mat-error>{{ username.getError('server') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Email</mat-label>
+      <input matInput type="email" formControlName="email" autocomplete="email" />
+      <mat-icon matPrefix aria-hidden="true">mail</mat-icon>
+      @let email = form.controls.email;
+      @if (email.hasError('required')) {
+        <mat-error>Email is required</mat-error>
+      } @else if (email.hasError('email') || email.hasError('maxlength')) {
+        <mat-error>Enter a valid email address</mat-error>
+      } @else if (email.hasError('server')) {
+        <mat-error>{{ email.getError('server') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Password</mat-label>
+      <input
+        matInput
+        formControlName="password"
+        [type]="hidePassword() ? 'password' : 'text'"
+        autocomplete="new-password"
+      />
+      <mat-icon matPrefix aria-hidden="true">lock</mat-icon>
+      <button
+        mat-icon-button
+        matSuffix
+        type="button"
+        [attr.aria-label]="hidePassword() ? 'Show password' : 'Hide password'"
+        (click)="hidePassword.set(!hidePassword())"
+      >
+        <mat-icon>{{ hidePassword() ? 'visibility' : 'visibility_off' }}</mat-icon>
+      </button>
+      @let password = form.controls.password;
+      @if (password.hasError('required')) {
+        <mat-error>Password is required</mat-error>
+      } @else if (password.hasError('passwordPolicy')) {
+        <mat-error>Password does not meet the requirements</mat-error>
+      } @else if (password.hasError('server')) {
+        <mat-error>{{ password.getError('server') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <ul class="hint-list" aria-label="Password requirements">
+      @for (check of passwordChecks(); track check.label) {
+        <li [class.ok]="check.ok">{{ check.ok ? '✓' : '•' }} {{ check.label }}</li>
+      }
+    </ul>
+
+    <mat-form-field>
+      <mat-label>Confirm password</mat-label>
+      <input
+        matInput
+        formControlName="confirmPassword"
+        [type]="hidePassword() ? 'password' : 'text'"
+        autocomplete="new-password"
+      />
+      <mat-icon matPrefix aria-hidden="true">lock_reset</mat-icon>
+      @if (form.controls.confirmPassword.hasError('required')) {
+        <mat-error>Please confirm your password</mat-error>
+      }
+      @if (form.hasError('passwordMismatch')) {
+        <mat-hint class="mismatch">Passwords do not match</mat-hint>
+      }
+    </mat-form-field>
+
+    <button mat-flat-button class="submit" type="submit" [disabled]="submitting()">
+      @if (submitting()) {
+        <mat-spinner diameter="22" />
+      } @else {
+        Create account
+      }
+    </button>
+  </form>
+
+  <p class="footer">Already registered? <a routerLink="/login">Sign in</a></p>
+</section>

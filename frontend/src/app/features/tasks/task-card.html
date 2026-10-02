@@ -1,0 +1,52 @@
+@let item = task();
+<article class="card" [attr.aria-busy]="busy()">
+  <header>
+    <button
+      mat-stroked-button
+      class="status"
+      [class]="'status status-' + item.status"
+      [matMenuTriggerFor]="statusMenu"
+      [disabled]="busy()"
+      [attr.aria-label]="'Status: ' + statusLabel() + '. Change status'"
+    >
+      <mat-icon>{{ statusIcon() }}</mat-icon>
+      {{ statusLabel() }}
+    </button>
+    <mat-menu #statusMenu="matMenu">
+      @for (status of statuses; track status.value) {
+        <button
+          mat-menu-item
+          [disabled]="status.value === item.status"
+          (click)="statusChange.emit({ task: item, status: status.value })"
+        >
+          <mat-icon>{{ status.icon }}</mat-icon>
+          <span>{{ status.label }}</span>
+        </button>
+      }
+    </mat-menu>
+
+    <span class="actions">
+      <button mat-icon-button matTooltip="Edit" [attr.aria-label]="'Edit ' + item.title" [disabled]="busy()" (click)="edit.emit(item)">
+        <mat-icon>edit</mat-icon>
+      </button>
+      <button mat-icon-button matTooltip="Delete" [attr.aria-label]="'Delete ' + item.title" [disabled]="busy()" (click)="delete.emit(item)">
+        <mat-icon>delete_outline</mat-icon>
+      </button>
+    </span>
+  </header>
+
+  <h3 class="title">{{ item.title }}</h3>
+  @if (item.description) {
+    <p class="description">{{ item.description }}</p>
+  }
+
+  <footer class="due">
+    <mat-icon aria-hidden="true">{{ item.isOverdue ? 'warning_amber' : 'event' }}</mat-icon>
+    <span>
+      @if (item.isOverdue) {
+        <strong>Overdue</strong> ·
+      }
+      Due {{ dueDate() | date: 'EEE, MMM d, y' }}
+    </span>
+  </footer>
+</article>

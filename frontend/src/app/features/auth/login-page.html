@@ -1,0 +1,67 @@
+<section class="card">
+  <header class="header">
+    <mat-icon aria-hidden="true">task_alt</mat-icon>
+    <h1>Welcome back</h1>
+    <p>Sign in to manage your tasks</p>
+  </header>
+
+  @if (sessionExpired()) {
+    <div class="info-banner" role="status">Your session has expired. Please sign in again.</div>
+  }
+
+  <div class="demo">
+    <span>Demo: <strong>demo</strong> / <strong>Demo123!</strong></span>
+    <button mat-button type="button" (click)="useDemoAccount()">Use demo</button>
+  </div>
+
+  @if (error(); as message) {
+    <div class="error-banner" role="alert">
+      <mat-icon aria-hidden="true">error_outline</mat-icon>
+      <span>{{ message }}</span>
+    </div>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    <mat-form-field>
+      <mat-label>Username</mat-label>
+      <input matInput formControlName="username" autocomplete="username" autocapitalize="none" />
+      <mat-icon matPrefix aria-hidden="true">person</mat-icon>
+      @if (form.controls.username.hasError('required')) {
+        <mat-error>Username is required</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Password</mat-label>
+      <input
+        matInput
+        formControlName="password"
+        [type]="hidePassword() ? 'password' : 'text'"
+        autocomplete="current-password"
+      />
+      <mat-icon matPrefix aria-hidden="true">lock</mat-icon>
+      <button
+        mat-icon-button
+        matSuffix
+        type="button"
+        [attr.aria-label]="hidePassword() ? 'Show password' : 'Hide password'"
+        (click)="hidePassword.set(!hidePassword())"
+      >
+        <mat-icon>{{ hidePassword() ? 'visibility' : 'visibility_off' }}</mat-icon>
+      </button>
+      @if (form.controls.password.hasError('required')) {
+        <mat-error>Password is required</mat-error>
+      }
+    </mat-form-field>
+
+    <button mat-flat-button class="submit" type="submit" [disabled]="submitting()">
+      @if (submitting()) {
+        <mat-spinner diameter="22" />
+      } @else {
+        Sign in
+      }
+    </button>
+  </form>
+
+  <p class="footer">No account yet? <a routerLink="/register">Create one</a></p>
+</section>
