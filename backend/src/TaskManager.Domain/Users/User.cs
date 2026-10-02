@@ -37,8 +37,21 @@ public sealed partial class User
         }
 
         var errors = new ValidationErrors();
+        Validate(username, email, errors);
+        errors.ThrowIfAny();
 
-        var normalizedUsername = username?.Trim() ?? string.Empty;
+        return new User(Guid.NewGuid(), NormalizeUsername(username), NormalizeEmail(email), passwordHash, nowUtc);
+    }
+
+    /// <summary>
+    /// Exposed so the registration flow can report identity and password errors together,
+    /// before paying the cost of hashing the password.
+    /// </summary>
+    public static void Validate(string? username, string? email, ValidationErrors errors)
+    {
+        ArgumentNullException.ThrowIfNull(errors);
+
+        var normalizedUsername = NormalizeUsername(username);
         if (normalizedUsername.Length is < UsernameMinLength or > UsernameMaxLength)
         {
             errors.Add("username", $"Username must be between {UsernameMinLength} and {UsernameMaxLength} characters.");
@@ -48,7 +61,7 @@ public sealed partial class User
             errors.Add("username", "Username may only contain letters, numbers, '.', '_' and '-'.");
         }
 
-        var normalizedEmail = email?.Trim().ToLowerInvariant() ?? string.Empty;
+        var normalizedEmail = NormalizeEmail(email);
         if (normalizedEmail.Length == 0)
         {
             errors.Add("email", "Email is required.");
@@ -57,11 +70,11 @@ public sealed partial class User
         {
             errors.Add("email", "Email format is invalid.");
         }
-
-        errors.ThrowIfAny();
-
-        return new User(Guid.NewGuid(), normalizedUsername, normalizedEmail, passwordHash, nowUtc);
     }
+
+    public static string NormalizeUsername(string? username) => username?.Trim() ?? string.Empty;
+
+    public static string NormalizeEmail(string? email) => email?.Trim().ToLowerInvariant() ?? string.Empty;
 
     public static User Rehydrate(Guid id, string username, string email, string passwordHash, DateTime createdAtUtc) =>
         new(id, username, email, passwordHash, createdAtUtc);
