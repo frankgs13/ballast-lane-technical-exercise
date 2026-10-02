@@ -98,7 +98,8 @@ export class TaskListPage implements OnInit {
         autoFocus: 'first-tabbable',
       })
       .afterClosed()
-      .pipe(filter((task): task is Task => task !== undefined));
+      // A bare `mat-dialog-close` (Cancel button) closes with "" rather than undefined.
+      .pipe(filter((result): result is Task => typeof result === 'object' && result !== null));
   }
 
   private track<T>(id: string, request$: Observable<T>): Observable<T> {
