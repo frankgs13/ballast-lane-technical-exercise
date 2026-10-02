@@ -1,0 +1,5 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Domain has zero dependencies: no framework, no infrastructure. -->
+
+</Project>
